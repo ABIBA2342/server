@@ -1,4 +1,4 @@
 #!/bin/bash
 echo "Starting Docker containers..."
-docker compose -f deploy/docker-compose.yml up -d
+docker compose -f docker-compose.yml up -d
 exit 0
