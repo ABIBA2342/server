@@ -1,7 +1,7 @@
 #!/bin/bash
 echo "Starting Docker containers..."
 
-docker compose -f docker-compose.yml up -d
+docker compose -p postgres -f docker-compose.yml up -d
 
 sleep 15
 
