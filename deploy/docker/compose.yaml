@@ -1,0 +1,120 @@
+name: telesrv
+
+# One-command setup: docker compose up --build
+# Star gifts / NFT assets are baked into the telesrv image from data/official-gifts/.
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: telesrv-postgres
+    # Keep some sane defaults for dev
+    command:  
+      - "postgres"
+      - "-c"
+      - "max_locks_per_transaction=512"
+      - "-c"
+      - "shared_preload_libraries=pg_stat_statements"
+      - "-c"
+      - "pg_stat_statements.track=all"
+      - "-c"
+      - "track_io_timing=on"
+    environment:
+      POSTGRES_DB: telesrv
+      POSTGRES_USER: telesrv
+      POSTGRES_PASSWORD: telesrv
+      TZ: UTC
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U telesrv -d telesrv"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: telesrv-redis
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6399:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  telesrv:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: telesrv
+      args:
+        GO_VERSION: "1.26"
+    container_name: telesrv-server
+    image: telesrv-server:local
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      TELESRV_LISTEN: "0.0.0.0:2398"
+      TELESRV_ADVERTISE_IP: "192.168.1.3"
+      TELESRV_POSTGRES_DSN: "postgres://telesrv:telesrv@postgres:5432/telesrv?sslmode=disable"
+      TELESRV_REDIS_ADDR: "redis:6379"
+      TELESRV_BLOB_DIR: "/app/data/blobs"
+      TELESRV_OFFICIAL_GIFTS_DIR: "/app/official-gifts"
+      TELESRV_STICKER_SEED_DIR: "/app/data/sticker-seed"
+      TELESRV_SYSTEM_AVATAR_PATH: "/app/downloads/FromGram.png"
+      TELESRV_ADMIN_UI_ADDR: "0.0.0.0:2600"
+      TELESRV_ADMIN_API_ADDR: "0.0.0.0:2599"
+      # Set these in your .env or override via environment for security
+      TELESRV_ADMIN_API_TOKEN: "changeme_admin_api_token"
+      TELESRV_ADMIN_UI_PASSWORD: "changeme_ui_password"
+    volumes:
+      - appdata:/app/data
+    ports:
+      - "2398:2398"
+      - "2599:2599"
+      # admin UI is exposed by the separate telesrv-admin service
+    restart: unless-stopped
+  telesrv-admin:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: admin
+      args:
+        GO_VERSION: "1.26"
+    container_name: telesrv-admin
+    image: telesrv-admin:local
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      telesrv:
+        condition: service_started
+    environment:
+      TELESRV_ADMIN_UI_ADDR: "0.0.0.0:2600"
+      TELESRV_ADMIN_API_ADDR: "http://telesrv:2599"
+      TELESRV_ADMIN_API_TOKEN: "changeme_admin_api_token"
+      TELESRV_ADMIN_UI_PASSWORD: "changeme_ui_password"
+      TELESRV_ADMIN_SESSION_KEY: "changeme_admin_session_key"
+      TELESRV_POSTGRES_DSN: "postgres://telesrv:telesrv@postgres:5432/telesrv?sslmode=disable"
+      TELESRV_REDIS_ADDR: "redis:6379"
+    volumes:
+      - appdata:/app/data
+    ports:
+      - "2600:2600"
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  redisdata:
+  appdata:
