@@ -71,14 +71,14 @@ services:
       TELESRV_ADMIN_UI_ADDR: "0.0.0.0:2600"
       TELESRV_ADMIN_API_ADDR: "0.0.0.0:2599"
       
-      # --- НОВЫЕ ПАРОЛИ ---
       TELESRV_ADMIN_API_TOKEN: "14881488"
       TELESRV_ADMIN_UI_PASSWORD: "14881488"
       TELESRV_ADMIN_SESSION_KEY: "14881488_secret_key"
       
-      # --- НАСТРОЙКИ ДЛЯ БОТА ---
       TELESRV_PHONE_CODE_DELIVERY_PROVIDER: "development"
-      TELESRV_OTP_WEBHOOK_URL: "http://auth-bot:8080/"
+      
+      # Включаем режим отладки
+      TELESRV_DEBUG: "true"
     volumes:
       - appdata:/app/data
     ports:
@@ -105,12 +105,9 @@ services:
     environment:
       TELESRV_ADMIN_UI_ADDR: "0.0.0.0:2600"
       TELESRV_ADMIN_API_ADDR: "http://telesrv:2599"
-      
-      # --- НОВЫЕ ПАРОЛИ ДЛЯ АДМИНКИ ---
       TELESRV_ADMIN_API_TOKEN: "14881488"
       TELESRV_ADMIN_UI_PASSWORD: "14881488"
       TELESRV_ADMIN_SESSION_KEY: "14881488_secret_key"
-      
       TELESRV_POSTGRES_DSN: "postgres://telesrv:telesrv@postgres:5432/telesrv?sslmode=disable"
       TELESRV_REDIS_ADDR: "redis:6379"
     volumes:
@@ -119,13 +116,10 @@ services:
       - "2600:2600"
     restart: unless-stopped
 
-  # --- НОВЫЙ СЕРВИС: TELEGRAM БОТ ---
   auth-bot:
     build:
       context: ./bot
     container_name: auth-bot
-    environment:
-      BOT_TOKEN: "9090266003:AAFd6wj7Wb_cFbpakRQPFYN1E9sTkN0u0gg"
     restart: unless-stopped
 
 volumes:
