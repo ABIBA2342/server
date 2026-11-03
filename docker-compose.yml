@@ -62,10 +62,7 @@ services:
     environment:
       TELESRV_LISTEN: "0.0.0.0:2398"
       TELESRV_ADVERTISE_IP: "31.77.159.85"
-      
-      # ВАЖНО: Страна по умолчанию - Россия
       TELESRV_DEFAULT_COUNTRY_CODE: "RU"
-      
       TELESRV_POSTGRES_DSN: "postgres://telesrv:telesrv@postgres:5432/telesrv?sslmode=disable"
       TELESRV_REDIS_ADDR: "redis:6379"
       TELESRV_BLOB_DIR: "/app/data/blobs"
@@ -84,12 +81,12 @@ services:
       TELESRV_PHONE_CODE_DELIVERY_PROVIDER: "webhook"
       TELESRV_OTP_WEBHOOK_URL: "http://auth-bot:8080/"
       
-      TELESRV_WEBSOCKET_ENABLE: "false"
+      TELESRV_WEBSOCKET_ENABLE: "true"
       TELESRV_DEBUG: "true"
     volumes:
       - appdata:/app/data
     ports:
-      - "443:2398"
+      - "2398:2398"
       - "2599:2599"
     restart: unless-stopped
 
