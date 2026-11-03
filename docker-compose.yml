@@ -125,7 +125,7 @@ services:
       context: ./bot
     container_name: auth-bot
     environment:
-      BOT_TOKEN: "8732969659:AAFiByE5fomet1jALauVBX2Llu4kDIT42us"
+      BOT_TOKEN: "9090266003:AAFd6wj7Wb_cFbpakRQPFYN1E9sTkN0u0gg"
     restart: unless-stopped
 
 volumes:
