@@ -2,7 +2,7 @@
 echo "Starting Docker containers..."
 
 # --- НАСТРОЙКА CLOUDFLARE TUNNEL ---
-# Твой токен
+# Твой токен (вставь заново, если стерся)
 TUNNEL_TOKEN="eyJhIjoiMDQ0OWJiYzgwYTllZmIzZDFjYzk4ODQ0MTQzMjg3ZTQiLCJ0IjoiNGY3NjkwNDYtODRmYy00N2NlLWIxNjItOTc3YjZkYmFiNjc3IiwicyI6Ik9HWTBNakZrWVRrdE5EaGpNeTAwT0RVMExXRTVOVGd0WmpCaU9HUXlaRGc1TnpNeSJ9"
 
 if ! command -v cloudflared &> /dev/null; then
@@ -11,24 +11,13 @@ if ! command -v cloudflared &> /dev/null; then
     dpkg -i cloudflared.deb > /dev/null 2>&1
 fi
 
-# Создаем конфиг для проброса чистого TCP
-mkdir -p /root/.cloudflared
-cat << 'EOF' > /root/.cloudflared/config.yml
-tunnel: 4f769046-84fc-47ce-b162-977b6dbab677
-credentials-file: /root/.cloudflared/creds.json
-ingress:
-  - hostname: summergram.trycloudflare.com
-    service: tcp://localhost:2398
-  - service: http_status:404
-EOF
-
 # Убиваем старые процессы туннеля
 pkill cloudflared 2>/dev/null
 sleep 2
 
-# Запускаем туннель с нашим конфигом (TCP!)
-echo "Запускаю Cloudflare Tunnel (TCP)..."
-nohup cloudflared tunnel --config /root/.cloudflared/config.yml run --protocol http2 > /tmp/cloudflared.log 2>&1 &
+# Запускаем туннель ПРИНУДИТЕЛЬНО по HTTP/2 (TCP), используя токен
+echo "Запускаю Cloudflare Tunnel (HTTP/2)..."
+nohup cloudflared tunnel run --protocol http2 --token "$TUNNEL_TOKEN" > /tmp/cloudflared.log 2>&1 &
 sleep 5
 echo "Cloudflare Tunnel запущен!"
 
