@@ -8,16 +8,15 @@ if ! command -v cloudflared &> /dev/null; then
     dpkg -i cloudflared.deb > /dev/null 2>&1
 fi
 
-# Убиваем старые процессы
 pkill cloudflared 2>/dev/null
 sleep 2
 
-# Запускаем БЕСПЛАТНЫЙ быстрый туннель на порт 2398
 echo "Запускаю бесплатный Cloudflare Tunnel..."
+# Запускаем в фоне
 nohup cloudflared tunnel --url http://localhost:2398 --protocol http2 > /tmp/cloudflared.log 2>&1 &
 sleep 10
 
-# Вытаскиваем выданный адрес из логов
+# Вытаскиваем адрес
 TUNNEL_URL=$(grep -o 'https://.*\.trycloudflare\.com' /tmp/cloudflared.log | head -1)
 echo "========================================="
 echo "ВАШ НОВЫЙ АДРЕС СЕРВЕРА:"
@@ -43,6 +42,17 @@ echo "=== ВАШ RSA КЛЮЧ НАЧАЛО ==="
 docker cp telesrv-server:/app/data/server_rsa.pem /tmp/server_rsa.pem 2>/dev/null
 openssl rsa -in /tmp/server_rsa.pem -RSAPublicKey_out 2>/dev/null || echo "Ключ еще не готов"
 echo "=== ВАШ RSA КЛЮЧ КОНЕЦ ==="
+
+echo "=== СТАТУС ТУННЕЛЯ ==="
+if pgrep -x "cloudflared" > /dev/null; then
+    echo "Туннель РАБОТАЕТ (процесс найден)."
+    echo "Последние логи туннеля:"
+    tail -n 10 /tmp/cloudflared.log
+else
+    echo "Туннель УПАЛ. Логи ошибки:"
+    cat /tmp/cloudflared.log
+fi
+echo "=== КОНЕЦ СТАТУСА ==="
 
 echo "All containers are UP."
 exit 0
