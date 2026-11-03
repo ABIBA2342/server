@@ -1,25 +1,6 @@
 #!/bin/bash
 echo "Starting Docker containers..."
 
-# Запускаем Cloudflare Tunnel
-if ! command -v cloudflared &> /dev/null; then
-    curl -L --output cloudflared.deb https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
-    dpkg -i cloudflared.deb > /dev/null 2>&1
-fi
-
-pkill cloudflared 2>/dev/null
-sleep 2
-
-nohup cloudflared tunnel --url tcp://localhost:2398 --protocol http2 > /tmp/cloudflared.log 2>&1 &
-sleep 10
-
-TUNNEL_URL=$(grep -o 'https://.*\.trycloudflare\.com' /tmp/cloudflared.log | head -1)
-echo "========================================="
-echo "ВАШ НОВЫЙ АДРЕС:"
-echo "$TUNNEL_URL"
-echo "========================================="
-
-# Запускаем сервер
 fuser -k 2398/tcp 5432/tcp 2>/dev/null
 systemctl stop postgresql 2>/dev/null
 
@@ -37,10 +18,10 @@ docker cp telesrv-server:/app/data/server_rsa.pem /tmp/server_rsa.pem 2>/dev/nul
 openssl rsa -in /tmp/server_rsa.pem -RSAPublicKey_out 2>/dev/null || echo "Ключ еще не готов"
 echo "=== КОНЕЦ ==="
 
-# ВОТ ЗДЕСЬ МЫ ДОБАВИЛИ ВЫВОД ЛОГОВ СЕРВЕРА
-echo "=== ЛОГИ СЕРВЕРА ==="
-docker logs telesrv-server --tail 50
-echo "=== КОНЕЦ ЛОГОВ ==="
+echo "=== ОЖИДАНИЕ ВХОДА (нажмите Join в клиенте СЕЙЧАС) ==="
+# Ждем 60 секунд и показываем логи сервера в реальном времени
+timeout 60 docker logs -f telesrv-server || true
+echo "=== КОНЕЦ ОЖИДАНИЯ ==="
 
 echo "All containers are UP."
 exit 0
