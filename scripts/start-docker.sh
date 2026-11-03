@@ -2,7 +2,7 @@
 echo "Starting Docker containers..."
 
 # --- НАСТРОЙКА CLOUDFLARE TUNNEL ---
-# ВСТАВЬ СЮДА СВОЙ ТОКЕН (длинную строку, которая начинается с eyJ...)
+# Твой токен (уже вставлен)
 TUNNEL_TOKEN="eyJhIjoiMDQ0OWJiYzgwYTllZmIzZDFjYzk4ODQ0MTQzMjg3ZTQiLCJ0IjoiNGY3NjkwNDYtODRmYy00N2NlLWIxNjItOTc3YjZkYmFiNjc3IiwicyI6Ik9HWTBNakZrWVRrdE5EaGpNeTAwT0RVMExXRTVOVGd0WmpCaU9HUXlaRGc1TnpNeSJ9"
 
 # Скачиваем cloudflared (если его еще нет)
@@ -38,6 +38,10 @@ echo "=== ВАШ RSA КЛЮЧ НАЧАЛО ==="
 docker cp telesrv-server:/app/data/server_rsa.pem /tmp/server_rsa.pem 2>/dev/null
 openssl rsa -in /tmp/server_rsa.pem -RSAPublicKey_out 2>/dev/null || echo "Ключ еще не готов"
 echo "=== ВАШ RSA КЛЮЧ КОНЕЦ ==="
+
+echo "=== ЛОГИ ТУННЕЛЯ ==="
+cat /tmp/cloudflared.log
+echo "=== КОНЕЦ ЛОГОВ ТУННЕЛЯ ==="
 
 echo "All containers are UP."
 exit 0
