@@ -9,10 +9,8 @@ echo "POSTGRES_PASSWORD=telesrv" > deploy/docker/.env
 cp docker-compose.yml deploy/docker/compose.yaml
 echo "POSTGRES_PASSWORD=telesrv" > .env
 
-# ЖЕСТКАЯ ПЕРЕСБОРКА БОТА БЕЗ КЭША
 docker build --no-cache -t telesrv-auth-bot ./bot
 
-# Запускаем всё остальное
 docker compose -p telesrv -f docker-compose.yml up -d --force-recreate
 
 sleep 15
@@ -25,6 +23,12 @@ echo "=== ВАШ RSA КЛЮЧ КОНЕЦ ==="
 echo "=== ЛОГИ БОТА ==="
 docker logs auth-bot 2>&1
 echo "=== КОНЕЦ ЛОГОВ ==="
+
+echo "=== ТЕСТ СЕРВЕРА ==="
+docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+echo "---"
+docker logs telesrv-server --tail 30 2>&1
+echo "=== КОНЕЦ ТЕСТА ==="
 
 echo "All containers are UP."
 exit 0
