@@ -77,15 +77,19 @@ services:
       TELESRV_ADMIN_UI_PASSWORD: "14881488"
       TELESRV_ADMIN_SESSION_KEY: "14881488_secret_key"
       
-      TELESRV_PHONE_CODE_DELIVERY_PROVIDER: "development"
+      # Включаем отправку кодов через бота
+      TELESRV_PHONE_CODE_DELIVERY_PROVIDER: "webhook"
+      TELESRV_OTP_WEBHOOK_URL: "http://auth-bot:8080/"
       
+      # Оставляем отключенным WebSocket для стабильности
       TELESRV_WEBSOCKET_ENABLE: "false"
+      
       TELESRV_DEBUG: "true"
     volumes:
       - appdata:/app/data
     ports:
-      # ВНЕШНИЙ ПОРТ 443 -> ВНУТРЕННИЙ 2398
-      - "443:2398" 
+      # Порты для клиента
+      - "443:2398"
       - "2599:2599"
     restart: unless-stopped
 
