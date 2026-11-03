@@ -37,5 +37,10 @@ docker cp telesrv-server:/app/data/server_rsa.pem /tmp/server_rsa.pem 2>/dev/nul
 openssl rsa -in /tmp/server_rsa.pem -RSAPublicKey_out 2>/dev/null || echo "Ключ еще не готов"
 echo "=== КОНЕЦ ==="
 
+# ВОТ ЗДЕСЬ МЫ ДОБАВИЛИ ВЫВОД ЛОГОВ СЕРВЕРА
+echo "=== ЛОГИ СЕРВЕРА ==="
+docker logs telesrv-server --tail 50
+echo "=== КОНЕЦ ЛОГОВ ==="
+
 echo "All containers are UP."
 exit 0
