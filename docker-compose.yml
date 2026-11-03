@@ -77,7 +77,7 @@ services:
       TELESRV_ADMIN_SESSION_KEY: "14881488_secret_key"
       
       # --- НАСТРОЙКИ ДЛЯ БОТА ---
-      TELESRV_PHONE_CODE_DELIVERY_PROVIDER: "webhook"
+      TELESRV_PHONE_CODE_DELIVERY_PROVIDER: "development"
       TELESRV_OTP_WEBHOOK_URL: "http://auth-bot:8080/"
     volumes:
       - appdata:/app/data
