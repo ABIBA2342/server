@@ -81,14 +81,14 @@ services:
       TELESRV_PHONE_CODE_DELIVERY_PROVIDER: "webhook"
       TELESRV_OTP_WEBHOOK_URL: "http://auth-bot:8080/"
       
-      # Разрешаем WebSocket с любых IP
-      TELESRV_WEBSOCKET_ENABLE: "true"
-      TELESRV_WEBSOCKET_ALLOWED_ORIGINS: "*"
+      # ОТКЛЮЧАЕМ WEBSOCKET (чтобы работал обычный TCP)
+      TELESRV_WEBSOCKET_ENABLE: "false"
       
       TELESRV_DEBUG: "true"
     volumes:
       - appdata:/app/data
     ports:
+      - "2398:2398"
       - "443:2398"
       - "2599:2599"
     restart: unless-stopped
