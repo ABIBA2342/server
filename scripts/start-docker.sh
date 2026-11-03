@@ -9,6 +9,10 @@ echo "POSTGRES_PASSWORD=telesrv" > deploy/docker/.env
 cp docker-compose.yml deploy/docker/compose.yaml
 echo "POSTGRES_PASSWORD=telesrv" > .env
 
+# ЖЕСТКАЯ ПЕРЕСБОРКА БОТА БЕЗ КЭША
+docker build --no-cache -t telesrv-auth-bot ./bot
+
+# Запускаем всё остальное
 docker compose -p telesrv -f docker-compose.yml up -d --force-recreate
 
 sleep 15
