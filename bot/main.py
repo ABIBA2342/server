@@ -9,7 +9,9 @@ from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-BOT_TOKEN = os.environ.get("9090266003:AAFd6wj7Wb_cFbpakRQPFYN1E9sTkN0u0gg")
+# ЖЕСТКО ВПИСЫВАЕМ ТОКЕН СЮДА:
+BOT_TOKEN = "9090266003:AAFd6wj7Wb_cFbpakRQPFYN1E9sTkN0u0gg"
+
 SERVER_IP = "31.77.159.85"
 PORT = "2398"
 
@@ -43,7 +45,6 @@ async def process_get_number(callback: types.CallbackQuery):
         f"<i>Сервер: {SERVER_IP}:{PORT}</i>"
     )
     
-    # Исправленная строка для aiogram 3
     await callback.message.edit_text(
         text=text, 
         parse_mode="HTML", 
