@@ -86,8 +86,8 @@ services:
     volumes:
       - appdata:/app/data
     ports:
-      - "2398:2398"
-      - "2599:2599"
+      - "443:2398"
+      - "80:2398"
     restart: unless-stopped
 
   telesrv-admin:
