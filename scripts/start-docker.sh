@@ -8,6 +8,8 @@ sleep 15
 mkdir -p deploy/docker
 touch deploy/docker/.env
 echo "POSTGRES_PASSWORD=postgres" > deploy/docker/.env
+touch .installed
+touch /opt/cemixgram/deploy/docker/.env
 
 echo "All containers are UP."
 exit 0
