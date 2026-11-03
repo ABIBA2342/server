@@ -71,13 +71,17 @@ services:
       TELESRV_ADMIN_UI_ADDR: "0.0.0.0:2600"
       TELESRV_ADMIN_API_ADDR: "0.0.0.0:2599"
       
+      # Название сервера
+      TELESRV_SERVER_NAME: "SummerGram"
+      
       TELESRV_ADMIN_API_TOKEN: "14881488"
       TELESRV_ADMIN_UI_PASSWORD: "14881488"
       TELESRV_ADMIN_SESSION_KEY: "14881488_secret_key"
       
+      # Для теста входа оставляем стандартный код 12345
       TELESRV_PHONE_CODE_DELIVERY_PROVIDER: "development"
       
-      # Включаем режим отладки
+      # Режим отладки
       TELESRV_DEBUG: "true"
     volumes:
       - appdata:/app/data
