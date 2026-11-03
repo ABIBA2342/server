@@ -1,18 +1,22 @@
 #!/bin/bash
 echo "Starting Docker containers..."
 
-# Устанавливаем postgresql (клиент и сервер), чтобы CemixBuild нашел базу
-apt-get update -qq
-apt-get install -y -qq postgresql > /dev/null 2>&1
+# 1. Намертво убиваем всё, что занимает порт 5432 (база данных)
+fuser -k 5432/tcp 2>/dev/null
+systemctl stop postgresql 2>/dev/null
+systemctl disable postgresql 2>/dev/null
 
-# Настраиваем пароль для локальной базы
-sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'postgres';" > /dev/null 2>&1
-sudo -u postgres psql -c "CREATE DATABASE telesrv;" > /dev/null 2>&1
+# 2. Создаем файлы для CemixBuild
+mkdir -p deploy/docker
+echo "POSTGRES_PASSWORD=telesrv" > deploy/docker/.env
+cp docker-compose.yml deploy/docker/compose.yaml
+echo "POSTGRES_PASSWORD=telesrv" > .env
 
-# Запускаем Docker
+# 3. Запускаем Docker
 docker compose -p telesrv -f docker-compose.yml up -d
 
-sleep 10
+# 4. Ждем
+sleep 15
 
 echo "All containers are UP."
 exit 0
