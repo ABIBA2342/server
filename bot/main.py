@@ -9,19 +9,15 @@ from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-# Настройки
-BOT_TOKEN = os.environ.get("8732969659:AAFiByE5fomet1jALauVBX2Llu4kDIT42us")
+BOT_TOKEN = os.environ.get("9090266003:AAFd6wj7Wb_cFbpakRQPFYN1E9sTkN0u0gg")
 SERVER_IP = "31.77.159.85"
 PORT = "2398"
 
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
-# База данных (в оперативной памяти для простоты)
-# Структура: { "номер_телефона": "chat_id_пользователя" }
 user_numbers = {}
 
-# --- ЧАСТЬ 1: Логика Telegram-бота ---
 @dp.message(Command("start"))
 async def cmd_start(message: types.Message):
     builder = InlineKeyboardBuilder()
@@ -35,11 +31,7 @@ async def cmd_start(message: types.Message):
 @dp.callback_query(lambda c: c.data == "get_number")
 async def process_get_number(callback: types.CallbackQuery):
     chat_id = callback.from_user.id
-    
-    # Генерируем рандомный номер +7 (например, 7999XXXXXXX)
     random_num = f"+79{random.randint(100000000, 999999999)}"
-    
-    # Сохраняем в базу, что этот номер принадлежит этому chat_id
     user_numbers[random_num] = str(chat_id)
     
     text = (
@@ -50,9 +42,15 @@ async def process_get_number(callback: types.CallbackQuery):
         f"3. Ждите код. Он придет сюда, в этот чат!\n\n"
         f"<i>Сервер: {SERVER_IP}:{PORT}</i>"
     )
-    await callback.message.edit_text(text, parse_mode="HTML")
+    
+    # Исправленная строка для aiogram 3
+    await callback.message.edit_text(
+        text=text, 
+        parse_mode="HTML", 
+        reply_markup=None
+    )
+    await callback.answer()
 
-# --- ЧАСТЬ 2: Вебхук-сервер (слушает запросы от FromGram) ---
 class WebhookHandler(BaseHTTPRequestHandler):
     def do_POST(self):
         content_length = int(self.headers['Content-Length'])
@@ -63,10 +61,8 @@ class WebhookHandler(BaseHTTPRequestHandler):
             phone = data.get("phone", "")
             code = data.get("code", data.get("otp", ""))
             
-            # Ищем, кому принадлежит этот номер
             if phone in user_numbers:
                 chat_id = user_numbers[phone]
-                # Отправляем сообщение в Telegram
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
                 loop.run_until_complete(
@@ -79,7 +75,7 @@ class WebhookHandler(BaseHTTPRequestHandler):
                 loop.close()
                 print(f"Код {code} отправлен для {phone} в чат {chat_id}", flush=True)
             else:
-                print(f"Номер {phone} не найден в базе!", flush=True)
+                print(f"Номер {phone} не найден в базе! Доступные: {list(user_numbers.keys())}", flush=True)
                 
             self.send_response(200)
             self.end_headers()
@@ -95,9 +91,8 @@ def run_webhook():
     server.serve_forever()
 
 async def main():
-    # Запускаем вебхук в отдельном потоке
     threading.Thread(target=run_webhook, daemon=True).start()
-    # Запускаем бота
+    print("Бот запущен и слушает Telegram...", flush=True)
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
