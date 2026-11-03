@@ -2,20 +2,21 @@
 echo "Starting Docker containers..."
 
 # --- НАСТРОЙКА CLOUDFLARE TUNNEL ---
-# Твой токен (уже вставлен)
 TUNNEL_TOKEN="eyJhIjoiMDQ0OWJiYzgwYTllZmIzZDFjYzk4ODQ0MTQzMjg3ZTQiLCJ0IjoiNGY3NjkwNDYtODRmYy00N2NlLWIxNjItOTc3YjZkYmFiNjc3IiwicyI6Ik9HWTBNakZrWVRrdE5EaGpNeTAwT0RVMExXRTVOVGd0WmpCaU9HUXlaRGc1TnpNeSJ9"
 
-# Скачиваем cloudflared (если его еще нет)
 if ! command -v cloudflared &> /dev/null; then
     echo "Устанавливаю cloudflared..."
     curl -L --output cloudflared.deb https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
     dpkg -i cloudflared.deb > /dev/null 2>&1
 fi
 
-# Убиваем старые процессы туннеля и запускаем новый
+# Убиваем старые процессы туннеля
 pkill cloudflared 2>/dev/null
-echo "Запускаю Cloudflare Tunnel..."
-nohup cloudflared tunnel run --token "$TUNNEL_TOKEN" > /tmp/cloudflared.log 2>&1 &
+sleep 2
+
+# Запускаем туннель ПРИНУДИТЕЛЬНО по HTTP/2 (TCP), чтобы обойти блокировки UDP
+echo "Запускаю Cloudflare Tunnel (HTTP/2)..."
+nohup cloudflared tunnel run --protocol http2 --token "$TUNNEL_TOKEN" > /tmp/cloudflared.log 2>&1 &
 sleep 5
 echo "Cloudflare Tunnel запущен!"
 
