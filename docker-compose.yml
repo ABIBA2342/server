@@ -87,7 +87,7 @@ services:
       - appdata:/app/data
     ports:
       - "443:2398"
-      - "80:2398"
+      - "2599:2599"
     restart: unless-stopped
 
   telesrv-admin:
