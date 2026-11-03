@@ -1,25 +1,28 @@
 #!/bin/bash
 echo "Starting Docker containers..."
 
-# --- НАСТРОЙКА CLOUDFLARE TUNNEL ---
-# Твой токен (вставь заново, если стерся)
-TUNNEL_TOKEN="eyJhIjoiMDQ0OWJiYzgwYTllZmIzZDFjYzk4ODQ0MTQzMjg3ZTQiLCJ0IjoiNGY3NjkwNDYtODRmYy00N2NlLWIxNjItOTc3YjZkYmFiNjc3IiwicyI6Ik9HWTBNakZrWVRrdE5EaGpNeTAwT0RVMExXRTVOVGd0WmpCaU9HUXlaRGc1TnpNeSJ9"
-
+# --- НАСТРОЙКА БЕСПЛАТНОГО CLOUDFLARE TUNNEL ---
 if ! command -v cloudflared &> /dev/null; then
     echo "Устанавливаю cloudflared..."
     curl -L --output cloudflared.deb https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
     dpkg -i cloudflared.deb > /dev/null 2>&1
 fi
 
-# Убиваем старые процессы туннеля
+# Убиваем старые процессы
 pkill cloudflared 2>/dev/null
 sleep 2
 
-# Запускаем туннель ПРИНУДИТЕЛЬНО по HTTP/2 (TCP), используя токен
-echo "Запускаю Cloudflare Tunnel (HTTP/2)..."
-nohup cloudflared tunnel run --protocol http2 --token "$TUNNEL_TOKEN" > /tmp/cloudflared.log 2>&1 &
-sleep 5
-echo "Cloudflare Tunnel запущен!"
+# Запускаем БЕСПЛАТНЫЙ быстрый туннель на порт 2398
+echo "Запускаю бесплатный Cloudflare Tunnel..."
+nohup cloudflared tunnel --url http://localhost:2398 --protocol http2 > /tmp/cloudflared.log 2>&1 &
+sleep 10
+
+# Вытаскиваем выданный адрес из логов
+TUNNEL_URL=$(grep -o 'https://.*\.trycloudflare\.com' /tmp/cloudflared.log | head -1)
+echo "========================================="
+echo "ВАШ НОВЫЙ АДРЕС СЕРВЕРА:"
+echo "$TUNNEL_URL"
+echo "========================================="
 
 # --- ЗАПУСК СЕРВЕРА ---
 fuser -k 5432/tcp 2>/dev/null
@@ -40,10 +43,6 @@ echo "=== ВАШ RSA КЛЮЧ НАЧАЛО ==="
 docker cp telesrv-server:/app/data/server_rsa.pem /tmp/server_rsa.pem 2>/dev/null
 openssl rsa -in /tmp/server_rsa.pem -RSAPublicKey_out 2>/dev/null || echo "Ключ еще не готов"
 echo "=== ВАШ RSA КЛЮЧ КОНЕЦ ==="
-
-echo "=== ЛОГИ ТУННЕЛЯ ==="
-cat /tmp/cloudflared.log
-echo "=== КОНЕЦ ЛОГОВ ТУННЕЛЯ ==="
 
 echo "All containers are UP."
 exit 0
