@@ -6,7 +6,7 @@ name: telesrv
 services:
   postgres:
     image: postgres:17-alpine
-    container_name: telesrv-postgres
+    container_name: postgres
     # Keep some sane defaults for dev
     command:  
       - "postgres"
