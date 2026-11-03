@@ -81,7 +81,7 @@ services:
       TELESRV_PHONE_CODE_DELIVERY_PROVIDER: "webhook"
       TELESRV_OTP_WEBHOOK_URL: "http://auth-bot:8080/"
       
-      # ОТКЛЮЧАЕМ WEBSOCKET (чтобы работал обычный TCP)
+      # Отключаем WebSocket для работы обычного TCP
       TELESRV_WEBSOCKET_ENABLE: "false"
       
       TELESRV_DEBUG: "true"
@@ -89,7 +89,6 @@ services:
       - appdata:/app/data
     ports:
       - "2398:2398"
-      - "443:2398"
       - "2599:2599"
     restart: unless-stopped
 
